@@ -1,27 +1,10 @@
-"""
-因子构建模块：MKT、SMB(调整后)、VMG(EP)、PMO(情绪) 四因子月收益率序列
-
-中国四因子模型（CH4新版）：
-  - MKT: 市场因子（全A股流通市值加权 - Rf）
-  - SMB: 规模因子 = (EP中性SMB + 换手率中性SMB) / 2
-  - VMG: 价值因子（高EP - 低EP），EP = 归母净利润 / 总市值
-  - PMO: 情绪因子（低换手率 - 高换手率），基于异常换手率2x3分组
-"""
-
 import pandas as pd
 import numpy as np
 from config import *
 
 
 def build_annual_ep(df_ret, df_is_):
-    """
-    按中国四因子标准方法构建每年6月底用于分组的 EP
-
-    做法（与FF价值因子的时序逻辑一致）：
-    - t年7月到t+1年6月，使用 t-1 年12月的年报数据
-    - EP = net_profit_parent(t-1) / market_cap(Dec t-1)
-    - 需确保净利润 > 0（亏损公司不纳入价值排序）
-    """
+   
     df = df_ret[["stkcd", "trdmnt", "msmvttl", "msmvosd", "mretwd"]].copy()
     df["month"] = df["trdmnt"].dt.month
     df["year"] = df["trdmnt"].dt.year
@@ -135,7 +118,6 @@ def compute_smb_vmg(df):
 def compute_abnormal_turnover(df_ret, df_turn):
     """
     计算异常换手率 = 本月日均换手率 / 过去12个月日均换手率均值
-    需要至少6个月历史数据
     """
     df = df_ret[["stkcd", "trdmnt", "msmvttl", "msmvosd", "mretwd"]].copy()
     df = df.merge(df_turn[["stkcd", "trdmnt", "turn_daily_avg"]],
